@@ -1,3 +1,7 @@
+//安装于灯板上，通过rf与PC端arduino通讯，接收控制灯板的命令
+//指令格式：ON,2：打开灯板，2级亮度  OFF：关闭灯板（指令并非来自于PC）
+//没有回复
+
 #include "RF24.h"
 #include "SPI.h"
 
@@ -8,7 +12,7 @@
 
 RF24 radio(9,10);
 const uint64_t pipe = 0xE6E6E6E6E601;
-String command = "";
+String rcvMsg = "";
 
 void setup() {
   // put your setup code here, to run once:
@@ -24,14 +28,14 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   while (radio.available()) {
-    radio.read(&command, sizeof(command));
-    if (command.startsWith("ON")) {
-      String brightness = command.substring(command.indexOf(',')+1, command.length());
+    radio.read(&rcvMsg, sizeof(rcvMsg));
+    if (rcvMsg.startsWith("ON")) {
+      String brightness = rcvMsg.substring(rcvMsg.indexOf(',')+1, rcvMsg.length());
       int brightNum = brightness.toInt();
       TurnOn(brightNum);
-    } else if (command == "OFF") {
+    } else if (rcvMsg == "OFF") {
       TurnOff();
-    } else command = "";
+    } else rcvMsg = "";
   }
 }
 
@@ -52,7 +56,7 @@ void TurnOn(int brightness) {
     digitalWrite(RELAY2, HIGH);
     digitalWrite(RELAY3, HIGH);
   } else ;
-  command = "";
+  rcvMsg = "";
 }
 
 void TurnOff() {
@@ -60,6 +64,6 @@ void TurnOff() {
   digitalWrite(RELAY1, LOW);
   digitalWrite(RELAY2, LOW);
   digitalWrite(RELAY3, LOW);
-  command = "";
+  rcvMsg = "";
 }
 

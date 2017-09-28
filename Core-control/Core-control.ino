@@ -1,11 +1,17 @@
+//通过串口与PC通信(Baud rate:115200),接收PC端开关红外线灯板的命令
+//指令格式：IR_ON 2,3：表示打开2号灯板，3级亮度  IR_OFF 2：关闭2号灯板
+//没有回复
+
 #include "RF24.h"
 #include "SPI.h"
 
-RF24 radio(9,10);
+//灯板程序中的ID需要与下面的ID相对应
 const uint64_t LIGHT1 = 0xE6E6E6E6E601;
 const uint64_t LIGHT2 = 0xE6E6E6E6E602;
 const uint64_t LIGHT3 = 0xE6E6E6E6E603;
 const uint64_t LIGHT4 = 0xE6E6E6E6E604;
+
+RF24 radio(9,10);
 String command = "";
 String sendMessage = "";
 
