@@ -39,7 +39,7 @@ void loop() {
 
 int GetOrder(String command) {
   if (command.startsWith("IR_ON")) {
-    String number = command.substring(command.indexOf(' ')+1, command.indexOf(' ')+2);
+    String number = command.substring(command.indexOf(' ')+1, command.indexOf(','));
     int num = number.toInt();
 //  num is the number of the light
     String brightness = command.substring(command.indexOf(',')+1, command.length());
@@ -61,26 +61,30 @@ int GetOrder(String command) {
 }
 
 void TurnOn (int num, int bright) {
-  
+  char msg[32] = "";
   if (num == 1) {
-    sendMessage = String("ON,"+bright);
+    sendMessage = String("ON,"+String(bright)); 
+    sendMessage.toCharArray(msg, 32);
     radio.openWritingPipe(LIGHT1);
-    radio.write(&sendMessage, sizeof(sendMessage));
+    radio.write(&msg, sizeof(msg));
     
   } else if (num == 2) {
-    sendMessage = String("ON,"+bright);
+    sendMessage = String("ON,"+String(bright));
+    sendMessage.toCharArray(msg, 32);
     radio.openWritingPipe(LIGHT2);
-    radio.write(&sendMessage, sizeof(sendMessage));
+    radio.write(&msg, sizeof(msg));
     
   } else if (num == 3) {
-    sendMessage = String("ON,"+bright);
+    sendMessage = String("ON,"+String(bright));
+    sendMessage.toCharArray(msg, 32);
     radio.openWritingPipe(LIGHT3);
-    radio.write(&sendMessage, sizeof(sendMessage));
+    radio.write(&msg, sizeof(msg));
     
   } else if (num == 4) {
-    sendMessage = String("ON,"+bright);
+    sendMessage = String("ON,"+String(bright));
+    sendMessage.toCharArray(msg, 32);
     radio.openWritingPipe(LIGHT4);
-    radio.write(&sendMessage, sizeof(sendMessage));
+    radio.write(&msg, sizeof(msg));
     
   } else ;
   
@@ -89,22 +93,22 @@ void TurnOn (int num, int bright) {
 
 void TurnOff (int num) {
   
-  sendMessage = "OFF";
+  char msg[32] = "OFF";
   if (num == 1) {
     radio.openWritingPipe(LIGHT1);
-    radio.write(&sendMessage, sizeof(sendMessage));
+    radio.write(&msg, sizeof(msg));
     
   } else if (num == 2) {
     radio.openWritingPipe(LIGHT2);
-    radio.write(&sendMessage, sizeof(sendMessage));
+    radio.write(&msg, sizeof(msg));
     
   } else if (num == 3) {
     radio.openWritingPipe(LIGHT3);
-    radio.write(&sendMessage, sizeof(sendMessage));
+    radio.write(&msg, sizeof(msg));
     
   } else if (num == 4) {
     radio.openWritingPipe(LIGHT4);
-    radio.write(&sendMessage, sizeof(sendMessage));
+    radio.write(&msg, sizeof(msg));
     
   } else ;
   sendMessage = "";

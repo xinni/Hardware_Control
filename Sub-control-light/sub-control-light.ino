@@ -5,14 +5,15 @@
 #include "RF24.h"
 #include "SPI.h"
 
-//定义三个继电器的接脚分别为 6，7，8
-#define RELAY1 6
-#define RELAY2 7
-#define RELAY3 8
+//定义三个继电器的接脚分别为 2，3，4
+#define RELAY1 2
+#define RELAY2 3
+#define RELAY3 4
 
 RF24 radio(9,10);
 const uint64_t pipe = 0xE6E6E6E6E601;
-String rcvMsg = "";
+char rcvMsg[32] = "";
+String msg;
 
 void setup() {
   // put your setup code here, to run once:
@@ -29,13 +30,14 @@ void loop() {
   // put your main code here, to run repeatedly:
   while (radio.available()) {
     radio.read(&rcvMsg, sizeof(rcvMsg));
-    if (rcvMsg.startsWith("ON")) {
-      String brightness = rcvMsg.substring(rcvMsg.indexOf(',')+1, rcvMsg.length());
+    msg = String(rcvMsg);
+    if (msg.startsWith("ON")) {
+      String brightness = msg.substring(msg.indexOf(',')+1, msg.length());
       int brightNum = brightness.toInt();
       TurnOn(brightNum);
-    } else if (rcvMsg == "OFF") {
+    } else if (msg == "OFF") {
       TurnOff();
-    } else rcvMsg = "";
+    } else msg = "";
   }
 }
 
@@ -56,7 +58,7 @@ void TurnOn(int brightness) {
     digitalWrite(RELAY2, HIGH);
     digitalWrite(RELAY3, HIGH);
   } else ;
-  rcvMsg = "";
+  msg = "";
 }
 
 void TurnOff() {
@@ -64,6 +66,6 @@ void TurnOff() {
   digitalWrite(RELAY1, LOW);
   digitalWrite(RELAY2, LOW);
   digitalWrite(RELAY3, LOW);
-  rcvMsg = "";
+  msg = "";
 }
 
