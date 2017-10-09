@@ -112,7 +112,7 @@ void TurnOff (int num) {
     radio.write(&msg, sizeof(msg));
     
   } else if (num == 4) {
-    char msg[32] = "OFF,1";
+    char msg[32] = "OFF,2";
     radio.openWritingPipe(LIGHT4);
     radio.write(&msg, sizeof(msg));
     
