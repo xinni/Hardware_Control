@@ -60,6 +60,7 @@ void loop() {
 }
 
 void TurnOn(int num, int brightness) {
+  brightness = brightness - 1;
   if (num == 1) {
     if (brightness >= 0 & brightness <= 7){
       digitalWrite(L1Switch, LOW);
