@@ -32,10 +32,12 @@ void setup() {
   pinMode(L1D1, OUTPUT);
   pinMode(L1D2, OUTPUT);
   pinMode(L1Switch, OUTPUT);
+  digitalWrite(L1Switch, HIGH);
   pinMode(L2D0, OUTPUT);
   pinMode(L2D1, OUTPUT);
   pinMode(L2D2, OUTPUT);
   pinMode(L2Switch, OUTPUT);
+  digitalWrite(L2Switch, HIGH);
 }
 
 void loop() {
