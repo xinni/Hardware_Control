@@ -85,19 +85,19 @@ void TurnOn(int num, int brightness) {
     if (brightness >= 0 & brightness <= 7){
       digitalWrite(L1Switch, LOW);
       if (brightness % 2) {
-        digitalWrite(L1D0, HIGH);
+        digitalWrite(L2D0, HIGH);
       } else {
-        digitalWrite(L1D0, LOW);
+        digitalWrite(L2D0, LOW);
       }
       if ((brightness/2) % 2) {
-        digitalWrite(L1D1, HIGH);
+        digitalWrite(L2D1, HIGH);
       } else {
-        digitalWrite(L1D1, LOW);
+        digitalWrite(L2D1, LOW);
       }
       if (((brightness/2)/2) % 2) {
-        digitalWrite(L1D2, HIGH);
+        digitalWrite(L2D2, HIGH);
       } else {
-        digitalWrite(L1D2, LOW);
+        digitalWrite(L2D2, LOW);
       }
     } else { }
     msg = "";

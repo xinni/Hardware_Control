@@ -31,7 +31,7 @@ void loop() {
     if (GetOrder(command)) {
       command = "";
     } else {
-      Serial.println("WRONG ORDER");
+      Serial.println("200 command error");
       command = "";
     }
   }
@@ -55,39 +55,48 @@ int GetOrder(String command) {
     TurnOff(num);
     command = "";
     return 1;
-  } 
+  } else if (command == "HELLO") {
+    Serial.println("101 ULTRASOUND|1.0|US2017016785");
+    command = "";
+    return 1;
+  }
   
   else return 0;
 }
 
 void TurnOn (int num, int bright) {
   char msg[32] = "";
-  if (num == 1) {
-    sendMessage = String("ON,1|"+String(bright)); 
-    sendMessage.toCharArray(msg, 32);
-    radio.openWritingPipe(LIGHT1);
-    radio.write(&msg, sizeof(msg));
+  if ((bright >= 1) && (bright <= 8)) {
+    if (num == 1) {
+      sendMessage = String("ON,1|"+String(bright)); 
+      sendMessage.toCharArray(msg, 32);
+      radio.openWritingPipe(LIGHT1);
+      radio.write(&msg, sizeof(msg));
+      Serial.println("100");
     
-  } else if (num == 2) {
-    sendMessage = String("ON,2|"+String(bright));
-    sendMessage.toCharArray(msg, 32);
-    radio.openWritingPipe(LIGHT2);
-    radio.write(&msg, sizeof(msg));
+    } else if (num == 2) {
+      sendMessage = String("ON,2|"+String(bright));
+      sendMessage.toCharArray(msg, 32);
+      radio.openWritingPipe(LIGHT2);
+      radio.write(&msg, sizeof(msg));
+      Serial.println("100");
     
-  } else if (num == 3) {
-    sendMessage = String("ON,1|"+String(bright));
-    sendMessage.toCharArray(msg, 32);
-    radio.openWritingPipe(LIGHT3);
-    radio.write(&msg, sizeof(msg));
+    } else if (num == 3) {
+      sendMessage = String("ON,1|"+String(bright));
+      sendMessage.toCharArray(msg, 32);
+      radio.openWritingPipe(LIGHT3);
+      radio.write(&msg, sizeof(msg));
+      Serial.println("100");
     
-  } else if (num == 4) {
-    sendMessage = String("ON,2|"+String(bright));
-    sendMessage.toCharArray(msg, 32);
-    radio.openWritingPipe(LIGHT4);
-    radio.write(&msg, sizeof(msg));
+    } else if (num == 4) {
+      sendMessage = String("ON,2|"+String(bright));
+      sendMessage.toCharArray(msg, 32);
+      radio.openWritingPipe(LIGHT4);
+      radio.write(&msg, sizeof(msg));
+      Serial.println("100");
     
-  } else ;
-  
+    } else Serial.println("200 command error");
+  } else Serial.println("200 command error");
   sendMessage = "";
 }
 
@@ -98,25 +107,27 @@ void TurnOff (int num) {
     char msg[32] = "OFF,1";
     radio.openWritingPipe(LIGHT1);
     radio.write(&msg, sizeof(msg));
+    Serial.println("100");
     
   } else if (num == 2) {
     char msg[32] = "OFF,2";
     radio.openWritingPipe(LIGHT2);
     radio.write(&msg, sizeof(msg));
+    Serial.println("100");
     
   } else if (num == 3) {
-//    sendMessage = String("OFF,"+String(num));
-//    sendMessage.toCharArray(msg, 32);
     char msg[32] = "OFF,1";
     radio.openWritingPipe(LIGHT3);
     radio.write(&msg, sizeof(msg));
+    Serial.println("100");
     
   } else if (num == 4) {
     char msg[32] = "OFF,2";
     radio.openWritingPipe(LIGHT4);
     radio.write(&msg, sizeof(msg));
+    Serial.println("100");
     
-  } else ;
+  } else Serial.println("201 1|2|Open IR lamp fail");
   sendMessage = "";
 }
 
