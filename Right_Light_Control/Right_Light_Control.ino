@@ -83,7 +83,7 @@ void TurnOn(int num, int brightness) {
     msg = "";
   } else if (num == 2) {
     if (brightness >= 0 & brightness <= 7){
-      digitalWrite(L1Switch, LOW);
+      digitalWrite(L2Switch, LOW);
       if (brightness % 2) {
         digitalWrite(L2D0, HIGH);
       } else {

@@ -95,8 +95,8 @@ void TurnOn (int num, int bright) {
       radio.write(&msg, sizeof(msg));
       Serial.println("100");
     
-    } else Serial.println("200 command error");
-  } else Serial.println("200 command error");
+    } else Serial.println("201 "+String(num)+"|"+String(bright)+"|Open IR lamp fail");
+  } else Serial.println("201 "+String(num)+"|"+String(bright)+"|Open IR lamp fail");
   sendMessage = "";
 }
 
@@ -127,7 +127,7 @@ void TurnOff (int num) {
     radio.write(&msg, sizeof(msg));
     Serial.println("100");
     
-  } else Serial.println("201 1|2|Open IR lamp fail");
+  } else Serial.println("202 "+String(num)+"|Close IR lamp fail");
   sendMessage = "";
 }
 
