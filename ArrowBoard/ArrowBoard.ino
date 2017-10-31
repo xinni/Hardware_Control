@@ -14,8 +14,8 @@ int flag = 0;
 
 //byte row = 0;
 byte blank[][32] = {
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, //尾部的一屏的空字符，用于清屏，参数和屏大小有关。
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,  
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 };
 byte up[][32] = {
 /*--  Up   --*/
@@ -40,6 +40,10 @@ byte right[][32] = {
 /*--  宽x高=16x16   --*/
 0x00,0x80,0x00,0xC0,0x00,0xE0,0x00,0xF0,0x00,0xF8,0xFF,0xFC,0xFF,0xFE,0xFF,0xFF,
 0xFF,0xFF,0xFF,0xFE,0xFF,0xFC,0x00,0xF8,0x00,0xF0,0x00,0xE0,0x00,0xC0,0x00,0x80,
+};
+byte stopSign[][32] = {
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x03,0xC0,0x07,0xE0,0x0F,0xF0,0x0F,0xF0,
+0x0F,0xF0,0x0F,0xF0,0x07,0xE0,0x03,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 };
 
 
@@ -74,20 +78,18 @@ void loop() {
     }
   }
   if(flag == 1) {   //UP
-    digitalWrite(Red, HIGH);
-    Display(up);
-  } else if(flag == 2) {
-    digitalWrite(Red, HIGH);
-    Display(down);
-  } else if(flag == 3) {
-    digitalWrite(Red, HIGH);
-    Display(left);
-  } else if(flag == 4) {
-    digitalWrite(Red, HIGH);
-    Display(right);
-  } else if(flag == 0) {
-    digitalWrite(Red, HIGH);
-    Display(blank);
+    Display(up, Green);
+  } else if(flag == 2) {  //DOWN
+    Display(down, Green);
+  } else if(flag == 3) {  //LEFT
+    Display(left, Green);
+//    Display(up, Green);
+  } else if(flag == 4) {  //RIGHT
+    Display(right,Green);
+  } else if(flag == 5) {  //STOP
+    Display(stopSign, Red);
+  }else if(flag == 0) {   //BLANK
+    Display(blank, Green);
   }
 
 }
@@ -106,7 +108,7 @@ int GetOrder(String command) {
     ArrowOff(dir);
     command = "";
     return 1;
-  } 
+  }
   
   else return 0;
 }
@@ -120,12 +122,15 @@ void ArrowOn(String dir, String f) {
     flag = 3;
   } else if(dir == "RIGHT") {
     flag = 4;
-  }
-  Serial.print("On"+dir+f);
+  } else if(dir == "STOP") {
+    flag = 5;
+  } else Serial.println("200 command error");
+  Serial.println("On"+dir+f);
 }
 
 void ArrowOff(String dir) {
-  Serial.print("Off"+dir);
+  flag = 0;
+  Serial.println("Off"+dir);
 }
 
 void hc138scan(byte r) {
@@ -135,44 +140,34 @@ void hc138scan(byte r) {
   digitalWrite(RowD, (r & 0x08));
 }
 
-void software_transfer(byte data) {
-  for(byte i=0; i<2; i++) {
+void spi_transfer(volatile char data)   //硬件SPI
+{
+  SPDR = data;                    // Start the transmission
+  while (!(SPSR & (1<<SPIF)))     // Wait the OEd of the transmission
+  {
+  };
+  //return SPDR;                  // return the received byte
+}
+
+void software_transfer(byte data, int color) {
+  for(byte i=0; i<8; i++) {
     digitalWrite(clk, 0);
     if(data & 0x08) {
-      digitalWrite(Green, 0);
+      digitalWrite(color, 0);
     } else {
-      digitalWrite(Green, 1);
+      digitalWrite(color, 1);
     }
     data = data << 1;
     digitalWrite(clk, 1);
   }
 }
 
-//void spi_transfer(volatile char data) {
-//  SPDR = data;
-//  while (!SPSR & (1 << SPIF));
-//}
-
-//Data in Serial transfer
-//void SendByte(unsigned char dat) {
-//  static unsigned char i;
-//  for (i = 0; i< 8; i++) {
-//    digitalWrite(Red,bitRead(dat, 7-i));
-//    digitalWrite(clk, 0);
-//    digitalWrite(clk, 1);
-//  }
-//}
-//
-//void SendByte2(unsigned char dat, byte offset) {
-//  static unsigned char i;
-//  for(i = 0; i < offset; i++) {
-//    digitalWrite(Red, bitRead(dat, 7-i));
-//    digitalWrite(clk, 0);
-//    digitalWrite(clk, 1);
-//  }
-//}
-
-void Display(byte data[][32]) {
+void Display(byte data[][32], int color) {
+  if(color == Green) {
+    digitalWrite(Red, HIGH);
+  } else if(color == Red) {
+    digitalWrite(Green, HIGH);
+  }
   for(int row=0; row<16; row++) {  //循环扫描16行
     for (int i=0; i<1; i++) {
       //硬件SPI  发送8字节耗时:22US         
@@ -180,10 +175,10 @@ void Display(byte data[][32]) {
 //      spi_transfer(~(hz[i][row*2+1]));  //硬件SPI   
 
       //软件SPI  发送8字节耗时:770US
-      software_transfer((data[i][row*2]));
-      software_transfer((data[i][row*2+1]));
-      shiftOut(Green,clk,MSBFIRST,~data[i][row*2]);
-      shiftOut(Green,clk,MSBFIRST,~data[i][row*2+1]);
+      software_transfer((data[i][row*2]), color);
+      software_transfer((data[i][row*2+1]), color);
+      shiftOut(color,clk,MSBFIRST,~data[i][row*2]);
+      shiftOut(color,clk,MSBFIRST,~data[i][row*2+1]);
     }
     digitalWrite(hc138en, 1);    //关闭显示
     hc138scan(15 - row);         //换行
