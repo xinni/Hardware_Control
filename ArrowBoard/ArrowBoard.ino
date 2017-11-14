@@ -74,6 +74,20 @@ byte logo[] = {
 0x00,0x02,0x09,0x12,0x29,0x52,0x2D,0x52,0x2B,0x52,0xF9,0xFE,0x2B,0x52,0x2D,0x52,
 0x29,0x52,0x09,0x12,0x00,0x04,0x33,0xF8,0x42,0x04,0x02,0x02,0x02,0x00,0x00,0x00,/*"達",1*/
 };
+
+byte redDisplay[64] = {
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+};
+byte greenDisplay[64] = {  
+0xC0,0x00,0x00,0x03,0xC0,0x00,0x00,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xC0,0x00,0x00,0x03,0xC0,0x00,0x00,0x03,
+};
+
 String command = "";
 
 void setup() {
@@ -104,27 +118,7 @@ void loop() {
       command = "";
     }
   }
-  if(flag == 1) {   //UP
-    com(camera, up);
-    display_bicolor(blank, combine);
-  } else if(flag == 2) {  //DOWN
-    com(camera, down);
-    display_bicolor(blank, combine);
-  } else if(flag == 3) {  //LEFT
-    com(camera, left);
-    display_bicolor(blank, combine);
-  } else if(flag == 4) {  //RIGHT
-    com(camera, right);
-    display_bicolor(blank, combine);
-  } else if(flag == 5) {  //STOP
-    display_bicolor(stopSign, camera);
-  } else if(flag == 0) {   //BLANK
-    display_bicolor(blank, camera);
-  } else if(flag == 6) {
-    
-    displayHanzi(logo,logoColor);
-  }
-
+  display_bicolor(redDisplay, greenDisplay);
 }
 
 int GetOrder(String command) {
@@ -162,15 +156,25 @@ int GetOrder(String command) {
 
 void ArrowOn(String dir, String f) {
   if(dir == "UP") {
-    flag = 1;
+    logicalAnd(greenDisplay, camera);
+    logicalAnd(redDisplay, camera);
+    logicalOr(greenDisplay, up);
   } else if(dir == "DOWN") {
-    flag = 2;
+    logicalAnd(greenDisplay, camera);
+    logicalAnd(redDisplay, camera);
+    logicalOr(greenDisplay, down);
   } else if(dir == "LEFT") {
-    flag = 3;
+    logicalAnd(greenDisplay, camera);
+    logicalAnd(redDisplay, camera);
+    logicalOr(greenDisplay, left);
   } else if(dir == "RIGHT") {
-    flag = 4;
+    logicalAnd(greenDisplay, camera);
+    logicalAnd(redDisplay, camera);
+    logicalOr(greenDisplay, right);
   } else if(dir == "STOP") {
-    flag = 5;
+    logicalAnd(greenDisplay, camera);
+    logicalAnd(redDisplay, camera);
+    logicalOr(redDisplay, stopSign);
   } else Serial.println("200 command error");
   Serial.println("On"+dir+f);
 }
@@ -246,7 +250,7 @@ void displayHanzi(byte data[], String color) {
     }
     
     digitalWrite(hc138en, 1);    //关闭显示
-    hc138scan(row);         //换行
+    hc138scan(row);             //换行
     digitalWrite(LATCH, 0);      //595刷新
     digitalWrite(LATCH, 1);
     //delayMicroseconds(500) ;   //节电用
@@ -258,6 +262,16 @@ void displayHanzi(byte data[], String color) {
 void com(byte a[], byte b[]) {
   for (int i = 0; i < 64; i++) {
     combine[i] = a[i]|b[i];
+  }
+}
+void logicalAnd(byte a[], byte b[]) {
+  for (int i = 0; i < 64; i++) {
+    a[i] = a[i]&b[i];
+  }
+}
+void logicalOr(byte a[], byte b[]) {
+  for (int i = 0; i < 64; i++) {
+    a[i] = a[i]|b[i];
   }
 }
 
