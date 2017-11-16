@@ -1,12 +1,21 @@
+#include "RF24.h"
+#include "SPI.h"
+
+RF24 radio(9,10);
+const uint64_t pipe = 0xE6E6E6E6E677;
+char rcvMsg[32] = "";
+String msg;
+
 #define RowA 2
 #define RowB 3
 #define RowC 4
 #define RowD 5
-#define LATCH 10
+#define LATCH A2
+#define CLK A3
 
-int latch = 10;
+//int latch = A2;
 int hc138en = 6;
-int clk = 9;
+//int clk = 9;
 int Red = 8; //R1
 int Green = 7; //G1
 
@@ -16,6 +25,7 @@ String logoColor = "";
 byte combine[64] = {
   
 };
+
 byte blank[] = {
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -87,7 +97,30 @@ byte greenDisplay[64] = {
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xC0,0x00,0x00,0x03,0xC0,0x00,0x00,0x03,
 };
-
+byte topLeft[] = {
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xC0,0x00,0x00,0x00,0xC0,0x00,0x00,0x00,  
+};
+byte topRight[] = {
+0xC0,0x00,0x00,0x00,0xC0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,  
+};
+byte bottomLeft[] = {
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x03,0x00,0x00,0x00,0x03,  
+};
+byte bottomRight[] = {
+0x00,0x00,0x00,0x03,0x00,0x00,0x00,0x03,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,  
+};
 String command = "";
 
 void setup() {
@@ -96,29 +129,37 @@ void setup() {
   pinMode(RowC, OUTPUT);
   pinMode(RowD, OUTPUT);
   pinMode(hc138en, OUTPUT);
-  pinMode(latch, OUTPUT);
+  pinMode(LATCH, OUTPUT);
   pinMode(Red, OUTPUT);
   pinMode(Green, OUTPUT);
-  pinMode(clk, OUTPUT);
+  pinMode(CLK, OUTPUT);
   
   Serial.begin(115200);
+  radio.begin();
+  radio.openReadingPipe(1, pipe);
+  radio.startListening();
 }
 
 void loop() {
-  
-  while (Serial.available()) {
-    command += char(Serial.read());
-    delay(10);
+
+  while (radio.available()) {
+    radio.read(&rcvMsg, sizeof(rcvMsg));
+    command = String(rcvMsg); 
   }
   if (command.length() > 0) {
-    if (GetOrder(command)) {
-      command = "";
-    } else {
-      Serial.println("200 command error");
-      command = "";
-    }
+      if (GetOrder(command)) {
+        command = "";
+      } else {
+        Serial.println("200 command error\r\n");
+        command = "";
+      }
   }
-  display_bicolor(redDisplay, greenDisplay);
+  if (flag == 0) {
+    display_bicolor(redDisplay, greenDisplay);
+  } else if (flag == 1) {
+    displayHanzi(logo, logoColor);
+  }
+  
 }
 
 int GetOrder(String command) {
@@ -155,6 +196,7 @@ int GetOrder(String command) {
 }
 
 void ArrowOn(String dir, String f) {
+  flag = 0;
   if(dir == "UP") {
     logicalAnd(greenDisplay, camera);
     logicalAnd(redDisplay, camera);
@@ -181,17 +223,52 @@ void ArrowOn(String dir, String f) {
 
 void ArrowOff(String dir) {
   flag = 0;
+  logicalAnd(greenDisplay, camera);
+  logicalAnd(redDisplay, camera);
   Serial.println("Off"+dir);
 }
 
 void LogoOn(String colorTemp) {
-  flag = 6;
+  flag = 1;
   logoColor = colorTemp;
   Serial.println("logo "+colorTemp);
 }
 
 void PosSwitch(int color, String pos) {
-  
+  flag = 0;
+  if (pos == "TOP_LEFT") {
+    if (color == 2) {
+      logicalOr(greenDisplay, topLeft);
+      logicalAndNon(redDisplay, topLeft);
+    }else if(color == 1) {
+      logicalOr(redDisplay, topLeft);
+      logicalAndNon(greenDisplay, topLeft);
+    }
+  } else if (pos == "TOP_RIGHT") {
+    if (color == 2) {
+      logicalOr(greenDisplay, topRight);
+      logicalAndNon(redDisplay, topRight);
+    }else if(color == 1) {
+      logicalOr(redDisplay, topRight);
+      logicalAndNon(greenDisplay, topRight);
+    }
+  } else if (pos == "BOTTOM_LEFT") {
+    if (color == 2) {
+      logicalOr(greenDisplay, bottomLeft);
+      logicalAndNon(redDisplay, bottomLeft);
+    }else if(color == 1) {
+      logicalOr(redDisplay, bottomLeft);
+      logicalAndNon(greenDisplay, bottomLeft);
+    }
+  } else if (pos == "BOTTOM_RIGHT") {
+    if (color == 2) {
+      logicalOr(greenDisplay, bottomRight);
+      logicalAndNon(redDisplay, bottomRight);
+    }else if(color == 1) {
+      logicalOr(redDisplay, bottomRight);
+      logicalAndNon(greenDisplay, bottomRight);
+    }
+  } else Serial.println("200 command error\r\n");
 }
 
 void hc138scan(byte r) {
@@ -203,7 +280,7 @@ void hc138scan(byte r) {
 
 void hc595senddata2(byte data, byte data2){// 高位在前  反相(1亮0灭)
  for (byte i=0; i<8;i++) {
-     digitalWrite(clk,0);
+     digitalWrite(CLK,0);
      if (data & 0x80) {
          digitalWrite(Red, 1);   
      } else {
@@ -216,7 +293,7 @@ void hc595senddata2(byte data, byte data2){// 高位在前  反相(1亮0灭)
      }
      data=data<<1;
      data2 = data2<<1;
-     digitalWrite(clk,1);
+     digitalWrite(CLK,1);
  }
 }
 
@@ -243,7 +320,7 @@ void displayHanzi(byte data[], String color) {
       hc595senddata2(~(data[row*2+32]), ~0x00);
       hc595senddata2(~(data[row*2+33]), ~0x00);
     } else {
-      hc595senddata2(~0x00, ~(data[row*2]));  
+      hc595senddata2(~0x00, ~(data[row*2]));
       hc595senddata2(~0x00, ~(data[row*2+1]));
       hc595senddata2(~0x00, ~(data[row*2+32]));
       hc595senddata2(~0x00, ~(data[row*2+33]));
@@ -259,19 +336,20 @@ void displayHanzi(byte data[], String color) {
   }
 }
 
-void com(byte a[], byte b[]) {
-  for (int i = 0; i < 64; i++) {
-    combine[i] = a[i]|b[i];
-  }
-}
 void logicalAnd(byte a[], byte b[]) {
   for (int i = 0; i < 64; i++) {
     a[i] = a[i]&b[i];
   }
 }
+
 void logicalOr(byte a[], byte b[]) {
   for (int i = 0; i < 64; i++) {
     a[i] = a[i]|b[i];
   }
 }
 
+void logicalAndNon(byte a[], byte b[]) {
+  for (int i = 0; i < 64; i++) {
+    a[i] = a[i]&(~b[i]);
+  }
+}

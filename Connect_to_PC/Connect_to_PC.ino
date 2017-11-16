@@ -10,6 +10,7 @@ const uint64_t LIGHT1 = 0xE6E6E6E6E601;
 const uint64_t LIGHT2 = 0xE6E6E6E6E601;
 const uint64_t LIGHT3 = 0xE6E6E6E6E603;
 const uint64_t LIGHT4 = 0xE6E6E6E6E603;
+const uint64_t LOGO = 0xE6E6E6E6E677;
 
 RF24 radio(9,10);
 String command = "";
@@ -59,6 +60,38 @@ int GetOrder(String command) {
     Serial.println("101 ULTRASOUND|1.0|US2017016785");
     command = "";
     return 1;
+    
+  } else if (command.startsWith("AR_ON")) {
+    String dir = command.substring(command.indexOf(' ')+1, command.indexOf(','));
+//  dir is the direction of the arrow
+    String f = command.substring(command.indexOf(',')+1, command.length());
+    TransferOrder(command);
+    command = "";
+    return 1;
+    
+  } else if (command.startsWith("AR_OFF")) {
+    String dir = command.substring(command.indexOf(' ')+1, command.length());
+    TransferOrder(command);
+    command = "";
+    return 1;
+    
+  } else if (command.startsWith("LOGO_ON")) {
+    String color = command.substring(command.indexOf(' ')+1, command.length());
+    TransferOrder(command);
+    command = "";
+    return 1;
+    
+  } else if (command.startsWith("GREEN_ON")) {
+    String pos = command.substring(command.indexOf(' ')+1, command.length());
+    TransferOrder(command);
+    
+  } else if (command.startsWith("RED_ON")) {
+    String pos = command.substring(command.indexOf(' ')+1, command.length());
+    TransferOrder(command);
+    
+  } else if (command.startsWith("POS_OFF")) {
+    String pos = command.substring(command.indexOf(' ')+1, command.length());
+    TransferOrder(command);
   }
   
   else return 0;
@@ -129,5 +162,13 @@ void TurnOff (int num) {
     
   } else Serial.println("202 "+String(num)+"|Close IR lamp fail");
   sendMessage = "";
+}
+
+void TransferOrder (String src) {
+  char msg[32] = "";
+  src.toCharArray(msg, 32);
+  Serial.println(msg);
+  radio.openWritingPipe(LOGO);
+  radio.write(&msg, sizeof(msg));
 }
 
