@@ -43,7 +43,7 @@ int GetOrder(String command) {
     String number = command.substring(command.indexOf(' ')+1, command.indexOf(','));
     int num = number.toInt();
 //  num is the number of the light
-    String brightness = command.substring(command.indexOf(',')+1, command.length());
+    String brightness = command.substring(command.indexOf(',')+1, command.indexOf('\r'));
     int brightNum = brightness.toInt();
 //  brightNum is the brightness of the light
     TurnOn(num, brightNum);
@@ -51,46 +51,46 @@ int GetOrder(String command) {
     return 1;
     
   } else if (command.startsWith("IR_OFF")) {
-    String number = command.substring(command.indexOf(' ')+1, command.length());
+    String number = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     int num = number.toInt();
     TurnOff(num);
     command = "";
     return 1;
   } else if (command == "HELLO") {
-    Serial.println("101 ULTRASOUND|1.0|US2017016785");
+    Serial.println("101 IRLAMP_ARROW|1.0|IA2017016785");
     command = "";
     return 1;
     
   } else if (command.startsWith("AR_ON")) {
     String dir = command.substring(command.indexOf(' ')+1, command.indexOf(','));
 //  dir is the direction of the arrow
-    String f = command.substring(command.indexOf(',')+1, command.length());
+    String f = command.substring(command.indexOf(',')+1, command.indexOf('\r'));
     TransferOrder(command);
     command = "";
     return 1;
     
   } else if (command.startsWith("AR_OFF")) {
-    String dir = command.substring(command.indexOf(' ')+1, command.length());
+    String dir = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     TransferOrder(command);
     command = "";
     return 1;
     
   } else if (command.startsWith("LOGO_ON")) {
-    String color = command.substring(command.indexOf(' ')+1, command.length());
+    String color = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     TransferOrder(command);
     command = "";
     return 1;
     
   } else if (command.startsWith("GREEN_ON")) {
-    String pos = command.substring(command.indexOf(' ')+1, command.length());
+    String pos = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     TransferOrder(command);
     
   } else if (command.startsWith("RED_ON")) {
-    String pos = command.substring(command.indexOf(' ')+1, command.length());
+    String pos = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     TransferOrder(command);
     
   } else if (command.startsWith("POS_OFF")) {
-    String pos = command.substring(command.indexOf(' ')+1, command.length());
+    String pos = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     TransferOrder(command);
   }
   
