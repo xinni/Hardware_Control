@@ -65,6 +65,11 @@ int GetOrder(String command) {
     String dir = command.substring(command.indexOf(' ')+1, command.indexOf(','));
 //  dir is the direction of the arrow
     String f = command.substring(command.indexOf(',')+1, command.indexOf('\r'));
+    if (dir == "UP"|dir == "DOWN"|dir == "LEFT"|dir == "RIGHT"|dir == "STOP") {
+      if (f == "MID"|f == "FAST"|f == "SLOW"|f == "STEADY") {
+        Serial.println("100");
+      } else Serial.println("200");
+    } else Serial.println("200");
     TransferOrder(command);
     command = "";
     return 1;
@@ -72,21 +77,29 @@ int GetOrder(String command) {
   } else if (command.startsWith("AR_OFF")) {
     String dir = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     TransferOrder(command);
+    Serial.println("100");
     command = "";
     return 1;
     
   } else if (command.startsWith("LOGO_ON")) {
     String color = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     TransferOrder(command);
+    Serial.println("100");
     command = "";
     return 1;
     
   } else if (command.startsWith("GREEN_ON")) {
     String pos = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
+    if(pos == "TOP_LEFT"|pos == "TOP_RIGHT"|pos == "BOTTOM_LEFT"|pos == "BOTTOM_RIGHT") {
+      Serial.println("100");
+    }
     TransferOrder(command);
     
   } else if (command.startsWith("RED_ON")) {
     String pos = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
+    if(pos == "TOP_LEFT"|pos == "TOP_RIGHT"|pos == "BOTTOM_LEFT"|pos == "BOTTOM_RIGHT") {
+      Serial.println("100");
+    }
     TransferOrder(command);
     
   } else if (command.startsWith("POS_OFF")) {
@@ -167,7 +180,7 @@ void TurnOff (int num) {
 void TransferOrder (String src) {
   char msg[32] = "";
   src.toCharArray(msg, 32);
-  Serial.println(msg);
+//  Serial.println(msg);
   radio.openWritingPipe(LOGO);
   radio.write(&msg, sizeof(msg));
 }
