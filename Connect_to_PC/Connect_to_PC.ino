@@ -56,7 +56,7 @@ int GetOrder(String command) {
     TurnOff(num);
     command = "";
     return 1;
-  } else if (command == "HELLO") {
+  } else if (command.startsWith("HELLO")) {
     Serial.println("101 IRLAMP_ARROW|1.0|IA2017016785");
     command = "";
     return 1;

@@ -192,8 +192,11 @@ void loop() {
   while (Serial.available()) {
     serialCommand += char(Serial.read());
     delay(10);
-    if (serialCommand == "HELLO") {
-      Serial.println("101 ARROW|1.0|AR2017016785");
+    if (serialCommand.startsWith("HELLO")) {
+      Serial.println("101 ARROW|1.0|AR2017016785\r\n");
+      serialCommand = "";
+    } else {
+      Serial.println("200 command error\r\n");
       serialCommand = "";
     }
   }
@@ -205,7 +208,6 @@ void loop() {
       if (GetOrder(command)) {
         command = "";
       } else {
-//        Serial.println("200 command error\r\n");
         command = "";
       }
   }
@@ -224,29 +226,29 @@ int GetOrder(String command) {
   if (command.startsWith("AR_ON")) {
     String dir = command.substring(command.indexOf(' ')+1, command.indexOf(','));
 //  dir is the direction of the arrow
-    String f = command.substring(command.indexOf(',')+1, command.length());
+    String f = command.substring(command.indexOf(',')+1, command.indexOf("\r"));
     ArrowOn(dir, f);
     command = "";
     return 1;
     
   } else if (command.startsWith("AR_OFF")) {
-    String dir = command.substring(command.indexOf(' ')+1, command.length());
+    String dir = command.substring(command.indexOf(' ')+1, command.indexOf("\r"));
     ArrowOff(dir);
     command = "";
     return 1;
   } else if (command.startsWith("LOGO_ON")) {
-    String color = command.substring(command.indexOf(' ')+1, command.length());
+    String color = command.substring(command.indexOf(' ')+1, command.indexOf("\r"));
     LogoOn(color);
     command = "";
     return 1;
   } else if (command.startsWith("GREEN_ON")) {
-    String pos = command.substring(command.indexOf(' ')+1, command.length());
+    String pos = command.substring(command.indexOf(' ')+1, command.indexOf("\r"));
     PosSwitch(2,pos);
   } else if (command.startsWith("RED_ON")) {
-    String pos = command.substring(command.indexOf(' ')+1, command.length());
+    String pos = command.substring(command.indexOf(' ')+1, command.indexOf("\r"));
     PosSwitch(1,pos);
   } else if (command.startsWith("POS_OFF")) {
-    String pos = command.substring(command.indexOf(' ')+1, command.length());
+    String pos = command.substring(command.indexOf(' ')+1, command.indexOf("\r"));
     PosSwitch(0,pos);
   }
   
