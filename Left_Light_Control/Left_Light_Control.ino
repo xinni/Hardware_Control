@@ -10,7 +10,7 @@
 #define L1D1 3
 #define L1D2 4
 #define L1Switch 5
-//定义第二个灯板亮度控制的三位分别为 D6，D7，D8，开关位为A2
+//定义第三个灯板亮度控制的三位分别为 D6，D7，D8，开关位为A2
 #define RELAY4 5
 #define L2D0 6
 #define L2D1 7
@@ -122,4 +122,3 @@ void TurnOff(int num) {
   } else msg = "";
 
 }
-

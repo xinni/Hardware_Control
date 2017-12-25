@@ -5,7 +5,7 @@
 #include "RF24.h"
 #include "SPI.h"
 
-//定义第三个灯板亮度控制的三位分别为 D2，D3，D4，开关位为D5
+//定义第二个灯板亮度控制的三位分别为 D2，D3，D4，开关位为D5
 #define L1D0 2
 #define L1D1 3
 #define L1D2 4
@@ -122,4 +122,3 @@ void TurnOff(int num) {
   } else msg = "";
 
 }
-
