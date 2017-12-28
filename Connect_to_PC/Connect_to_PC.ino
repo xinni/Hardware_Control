@@ -11,15 +11,22 @@ const uint64_t LIGHT2 = 0xE6E6E6E6E603;
 const uint64_t LIGHT3 = 0xE6E6E6E6E601;
 const uint64_t LIGHT4 = 0xE6E6E6E6E603;
 const uint64_t LOGO = 0xE6E6E6E6E677;
+// 用于接收回馈
+const uint64_t MAIN = 0xE6E6E6E6E602;
 
 RF24 radio(9,10);
 String command = "";
 String sendMessage = "";
 
+char rcvMsg[32] = "";
+String rcvMsgStr;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   radio.begin();
+  radio.openReadingPipe(1, MAIN);
+  radio.startListening();
 }
 
 void loop() {
@@ -37,6 +44,18 @@ void loop() {
       command = "";
     }
   }
+  while (radio.available()) {
+    radio.read(&rcvMsg, sizeof(rcvMsg));
+    rcvMsgStr = String(rcvMsg);
+    if (rcvMsgStr.startsWith("212")) {
+      Serial.print(rcvMsgStr+"\r\n");
+      rcvMsgStr = "";
+    } else if (rcvMsgStr.startsWith("213")) {
+      Serial.print(rcvMsgStr+"\r\n");
+      rcvMsgStr = "";
+    } else rcvMsgStr = "";
+  }
+     
 }
 
 int GetOrder(String command) {
@@ -49,6 +68,8 @@ int GetOrder(String command) {
     int brightNum = brightness.toInt();
 //  brightNum is the brightness of the light
     TurnOn(num, brightNum);
+    radio.openReadingPipe(1, MAIN);
+    radio.startListening();
     command = "";
     return 1;
 
@@ -56,6 +77,8 @@ int GetOrder(String command) {
     String number = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     int num = number.toInt();
     TurnOff(num);
+    radio.openReadingPipe(1, MAIN);
+    radio.startListening();
     command = "";
     return 1;
   } else if (command.startsWith("HELLO")) {
@@ -76,18 +99,24 @@ int GetOrder(String command) {
     } else Serial.print("200 command error\r\n");
 
     TransferOrder(command);
+    radio.openReadingPipe(1, MAIN);
+    radio.startListening();
     command = "";
     return 1;
 
   } else if (command.startsWith("AR_OFF")) {
     TransferOrder(command);
     Serial.print("100\r\n");
+    radio.openReadingPipe(1, MAIN);
+    radio.startListening();
     command = "";
     return 1;
 
   } else if (command.startsWith("LOGO_ON")) {
     String color = command.substring(command.indexOf(' ')+1, command.length());
     TransferOrder(command);
+    radio.openReadingPipe(1, MAIN);
+    radio.startListening();
     Serial.print("100\r\n");
     command = "";
     return 1;
@@ -98,6 +127,10 @@ int GetOrder(String command) {
       Serial.print("100\r\n");
     }
     TransferOrder(command);
+    radio.openReadingPipe(1, MAIN);
+    radio.startListening();
+    command = "";
+    return 1;
 
   } else if (command.startsWith("RED_ON")) {
     String pos = command.substring(command.indexOf(' ')+1, command.length());
@@ -105,11 +138,19 @@ int GetOrder(String command) {
       Serial.print("100\r\n");
     }
     TransferOrder(command);
+    radio.openReadingPipe(1, MAIN);
+    radio.startListening();
+    command = "";
+    return 1;
 
   } else if (command.startsWith("POS_OFF")) {
 //    String pos = command.substring(command.indexOf(' ')+1, indexOf('\r'));
     Serial.print("100\r\n");
     TransferOrder(command);
+    radio.openReadingPipe(1, MAIN);
+    radio.startListening();
+    command = "";
+    return 1;
   }
 
   else return 0;
@@ -121,6 +162,7 @@ void TurnOn (int num, int bright) {
     if (num == 1) {
       sendMessage = String("ON,1|"+String(bright));
       sendMessage.toCharArray(msg, 32);
+      radio.stopListening();
       radio.openWritingPipe(LIGHT1);
       radio.write(&msg, sizeof(msg));
       delay(10);
@@ -130,6 +172,7 @@ void TurnOn (int num, int bright) {
     } else if (num == 2) {
       sendMessage = String("ON,1|"+String(bright));
       sendMessage.toCharArray(msg, 32);
+      radio.stopListening();
       radio.openWritingPipe(LIGHT2);
       radio.write(&msg, sizeof(msg));
       delay(10);
@@ -139,6 +182,7 @@ void TurnOn (int num, int bright) {
     } else if (num == 3) {
       sendMessage = String("ON,2|"+String(bright));
       sendMessage.toCharArray(msg, 32);
+      radio.stopListening();
       radio.openWritingPipe(LIGHT3);
       radio.write(&msg, sizeof(msg));
       delay(10);
@@ -148,6 +192,7 @@ void TurnOn (int num, int bright) {
     } else if (num == 4) {
       sendMessage = String("ON,2|"+String(bright));
       sendMessage.toCharArray(msg, 32);
+      radio.stopListening();
       radio.openWritingPipe(LIGHT4);
       radio.write(&msg, sizeof(msg));
       delay(10);
@@ -164,6 +209,7 @@ void TurnOff (int num) {
 //  char msg[32] = "";
   if (num == 1) {
     char msg[32] = "OFF,1";
+    radio.stopListening();
     radio.openWritingPipe(LIGHT1);
     radio.write(&msg, sizeof(msg));
     delay(10);
@@ -172,6 +218,7 @@ void TurnOff (int num) {
 
   } else if (num == 2) {
     char msg[32] = "OFF,1";
+    radio.stopListening();
     radio.openWritingPipe(LIGHT2);
     radio.write(&msg, sizeof(msg));
     delay(10);
@@ -180,6 +227,7 @@ void TurnOff (int num) {
 
   } else if (num == 3) {
     char msg[32] = "OFF,2";
+    radio.stopListening();
     radio.openWritingPipe(LIGHT3);
     radio.write(&msg, sizeof(msg));
     delay(10);
@@ -188,6 +236,7 @@ void TurnOff (int num) {
 
   } else if (num == 4) {
     char msg[32] = "OFF,2";
+    radio.stopListening();
     radio.openWritingPipe(LIGHT4);
     radio.write(&msg, sizeof(msg));
     delay(10);
@@ -202,6 +251,7 @@ void TransferOrder (String src) {
   char msg[32] = "";
   src.toCharArray(msg, 32);
   // Serial.println(msg);
+  radio.stopListening();
   radio.openWritingPipe(LOGO);
   radio.write(&msg, sizeof(msg));
   delay(10);
