@@ -11,8 +11,14 @@ const uint64_t LIGHT2 = 0xE6E6E6E6E603;
 const uint64_t LIGHT3 = 0xE6E6E6E6E601;
 const uint64_t LIGHT4 = 0xE6E6E6E6E603;
 const uint64_t LOGO = 0xE6E6E6E6E677;
+
+//超声板程序中的ID需要与下面的ID相对应
+const uint64_t US1 = 0xE6E6E6E6E680;
+const uint64_t US2 = 0xE6E6E6E6E678;
+const uint64_t US3 = 0xE6E6E6E6E679;
 // 用于接收回馈
 const uint64_t MAIN = 0xE6E6E6E6E602;
+const uint64_t USC = 0xE6E6E6E6E602;
 
 RF24 radio(9,10);
 String command = "";

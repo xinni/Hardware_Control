@@ -10,7 +10,8 @@
 const uint64_t US1 = 0xE6E6E6E6E677;
 const uint64_t USC = 0xE6E6E6E6E666;
 
-float detectSet = 0;
+float detectSet1 = 0;
+float detectSet2 = 0;
 
 RF24 radio(9,10);
 const int TrigPin = 2;
@@ -46,7 +47,7 @@ void loop() {
   }
   if (serialCommand.length() > 0) {
     if (serialCommand.startsWith("HELLO")) {
-      Serial.print("101 ULTRASOUND|1.0|AR2017016785\r\n");
+      Serial.print("101 ULTRASOUND|1.0|US2017016785\r\n");
       serialCommand = "";
     } else {
       Serial.print("200 command error\r\n");
@@ -73,7 +74,7 @@ void loop() {
 /*************************************************************/
 /*************        US detect      *************************/
 /*************************************************************/
-  if (state & (detectSet != 0)) {
+  if (state & (detectSet2 != 0)) {
     DetectDist();
   }
 
@@ -91,9 +92,10 @@ void DetectDist () {
   cm = pulseIn(EchoPin, HIGH) / 58.0; //将回波时间换算成cm 
   cm = (int(cm * 100.0)) / 100.0; //保留两位小数 
 //  Serial.println(cm);
-  if (cm < detectSet) {
+  if ((cm < detectSet2) & (cm > detectSet1)) {
     if (flag == 0) {
-      String dist = String("102|1|TRUE|"+(String)cm);
+      //String dist = String("102|1|TRUE|"+(String)cm);
+      String dist = "102|1|TRUE";
       dist.toCharArray(msg, 32);
       radio.stopListening();
       radio.openWritingPipe(USC);
@@ -103,7 +105,8 @@ void DetectDist () {
     }
   } else {
     if (flag == 1) {
-      String dist = String("102|1|FALSE|"+(String)cm);
+      //String dist = String("102|1|FALSE|"+(String)cm);
+      String dist = "102|1|FALSE";
       dist.toCharArray(msg, 32);
       radio.stopListening();
       radio.openWritingPipe(USC);
@@ -130,8 +133,10 @@ int GetOrder(String command) {
 
   } else if (command.startsWith("US_SET")) {
     String num = command.substring(command.indexOf(' ')+1, command.indexOf(','));
-    String set = command.substring(command.indexOf(',')+1, command.length());
-    detectSet = set.toInt();
+    String set1 = command.substring(command.indexOf(',')+1, command.lastIndexOf(','));
+    String set2 = command.substring(command.lastIndexOf(',')+1, command.length());
+    detectSet1 = set1.toInt();
+    detectSet2 = set2.toInt();
     command = "";
     return 1;
 

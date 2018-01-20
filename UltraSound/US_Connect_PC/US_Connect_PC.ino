@@ -66,7 +66,7 @@ void loop() {
 int GetOrder(String command) {
   command.trim();
   if (command == "HELLO") {
-    Serial.print("101 US_PC|1.0|IA2017016785\r\n");
+    Serial.print("101 ULTRASOUND|1.0|US2017016785\r\n");
     command = "";
     return 1;
     
@@ -101,9 +101,12 @@ int GetOrder(String command) {
     return 1; 
 
   } else if (command.startsWith("US_STATUS")) {
-     int num = command.substring(command.indexOf(' ')+1, command.length()).toInt();
+     String numStr = command.substring(command.indexOf(' ')+1, command.length());
+     int num = numStr.toInt();
+     //int num = command.substring(command.indexOf(' ')+1, command.length()).toInt();
      String reply = CheckStatus(num);
-     Serial.print(reply+"\r\n");
+     Serial.print("102 "+numStr+"|"+reply+"\r\n");
+     //Serial.print(reply+"\r\n");
      return 1;
   }
   else {
