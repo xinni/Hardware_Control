@@ -40,8 +40,8 @@ void loop() {
       serialCommand = "";
       
     } else {
-      radio.openReadingPipe(1, US1);
-      radio.startListening();
+//      radio.openReadingPipe(1, US1);
+//      radio.startListening();
       Serial.print("200 command error\r\n");
       serialCommand = "";
     }

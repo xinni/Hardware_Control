@@ -20,6 +20,8 @@ const uint64_t US3 = 0xE6E6E6E6E679;
 const uint64_t MAIN = 0xE6E6E6E6E602;
 const uint64_t USC = 0xE6E6E6E6E602;
 
+int usStatus[3] = {0,0,0};
+
 RF24 radio(9,10);
 String command = "";
 String sendMessage = "";
@@ -45,6 +47,8 @@ void loop() {
     command.trim();
     if (GetOrder(command)) {
       command = "";
+      radio.openReadingPipe(1, USC);
+      radio.startListening(); 
     } else {
       Serial.print("200 command error\r\n");
       command = "";
@@ -53,13 +57,28 @@ void loop() {
   while (radio.available()) {
     radio.read(&rcvMsg, sizeof(rcvMsg));
     rcvMsgStr = String(rcvMsg);
-    if (rcvMsgStr.startsWith("212")) {
-      Serial.print(rcvMsgStr+"\r\n");
-      rcvMsgStr = "";
-    } else if (rcvMsgStr.startsWith("213")) {
-      Serial.print(rcvMsgStr+"\r\n");
-      rcvMsgStr = "";
-    } else rcvMsgStr = "";
+
+    if (rcvMsgStr.length() > 0) {
+      if(rcvMsgStr.startsWith("102")) {
+        int num = rcvMsgStr.substring(rcvMsgStr.indexOf('|')+1, rcvMsgStr.indexOf('|')+2).toInt();
+        String usState = rcvMsgStr.substring(rcvMsgStr.indexOf('|')+3, rcvMsgStr.indexOf('|')+7);
+        if (usState == "TRUE") {
+          usStatus[num-1] = 1;
+        } else {usStatus[num-1] = 0;}
+        Serial.print(rcvMsgStr+"\r\n");
+        rcvMsgStr = "";
+      
+      } else if (rcvMsgStr.startsWith("212")) {
+        Serial.print(rcvMsgStr+"\r\n");
+        rcvMsgStr = "";
+      
+      } else if (rcvMsgStr.startsWith("213")) {
+        Serial.print(rcvMsgStr+"\r\n");
+        rcvMsgStr = "";
+      
+      } else rcvMsgStr = "";
+    }
+    
   }
      
 }
@@ -74,8 +93,8 @@ int GetOrder(String command) {
     int brightNum = brightness.toInt();
 //  brightNum is the brightness of the light
     TurnOn(num, brightNum);
-    radio.openReadingPipe(1, MAIN);
-    radio.startListening();
+//    radio.openReadingPipe(1, MAIN);
+//    radio.startListening();
     command = "";
     return 1;
 
@@ -83,8 +102,8 @@ int GetOrder(String command) {
     String number = command.substring(command.indexOf(' ')+1, command.indexOf('\r'));
     int num = number.toInt();
     TurnOff(num);
-    radio.openReadingPipe(1, MAIN);
-    radio.startListening();
+//    radio.openReadingPipe(1, MAIN);
+//    radio.startListening();
     command = "";
     return 1;
   } else if (command.startsWith("HELLO")) {
@@ -105,24 +124,24 @@ int GetOrder(String command) {
     } else Serial.print("200 command error\r\n");
 
     TransferOrder(command);
-    radio.openReadingPipe(1, MAIN);
-    radio.startListening();
+//    radio.openReadingPipe(1, MAIN);
+//    radio.startListening();
     command = "";
     return 1;
 
   } else if (command.startsWith("AR_OFF")) {
     TransferOrder(command);
     Serial.print("100\r\n");
-    radio.openReadingPipe(1, MAIN);
-    radio.startListening();
+//    radio.openReadingPipe(1, MAIN);
+//    radio.startListening();
     command = "";
     return 1;
 
   } else if (command.startsWith("LOGO_ON")) {
     String color = command.substring(command.indexOf(' ')+1, command.length());
     TransferOrder(command);
-    radio.openReadingPipe(1, MAIN);
-    radio.startListening();
+//    radio.openReadingPipe(1, MAIN);
+//    radio.startListening();
     Serial.print("100\r\n");
     command = "";
     return 1;
@@ -133,8 +152,8 @@ int GetOrder(String command) {
       Serial.print("100\r\n");
     }
     TransferOrder(command);
-    radio.openReadingPipe(1, MAIN);
-    radio.startListening();
+//    radio.openReadingPipe(1, MAIN);
+//    radio.startListening();
     command = "";
     return 1;
 
@@ -144,8 +163,8 @@ int GetOrder(String command) {
       Serial.print("100\r\n");
     }
     TransferOrder(command);
-    radio.openReadingPipe(1, MAIN);
-    radio.startListening();
+//    radio.openReadingPipe(1, MAIN);
+//    radio.startListening();
     command = "";
     return 1;
 
@@ -153,10 +172,49 @@ int GetOrder(String command) {
 //    String pos = command.substring(command.indexOf(' ')+1, indexOf('\r'));
     Serial.print("100\r\n");
     TransferOrder(command);
-    radio.openReadingPipe(1, MAIN);
-    radio.startListening();
+//    radio.openReadingPipe(1, MAIN);
+//    radio.startListening();
     command = "";
     return 1;
+    
+  } else if (command.startsWith("US_ON")) {
+    int num = command.substring(command.indexOf(' ')+1, command.length()).toInt();
+    TransferUSOrder(command, num);
+    Serial.print("100\r\n");
+    return 1;
+    
+  } else if (command.startsWith("US_OFF")) {
+    int num = command.substring(command.indexOf(' ')+1, command.length()).toInt();
+    TransferUSOrder(command, num);
+    Serial.print("100\r\n");
+    return 1;
+    
+  } else if (command.startsWith("US_SLEEP")) {
+    int num = command.substring(command.indexOf(' ')+1, command.length()).toInt();
+    TransferUSOrder(command, num);
+    Serial.print("100\r\n");
+    return 1;
+    
+  } else if (command.startsWith("US_WAKEUP")) {
+    int num = command.substring(command.indexOf(' ')+1, command.length()).toInt();
+    TransferUSOrder(command, num);
+    Serial.print("100\r\n");
+    return 1;
+    
+  } else if (command.startsWith("US_SET")) {
+    int num = command.substring(command.indexOf(' ')+1, command.indexOf(',')).toInt();
+    TransferUSOrder(command, num);
+    Serial.print("100\r\n");
+    return 1; 
+
+  } else if (command.startsWith("US_STATUS")) {
+     String numStr = command.substring(command.indexOf(' ')+1, command.length());
+     int num = numStr.toInt();
+     //int num = command.substring(command.indexOf(' ')+1, command.length()).toInt();
+     String reply = CheckStatus(num);
+     Serial.print("102 "+numStr+"|"+reply+"\r\n");
+     //Serial.print(reply+"\r\n");
+     return 1;
   }
 
   else return 0;
@@ -262,4 +320,27 @@ void TransferOrder (String src) {
   radio.write(&msg, sizeof(msg));
   delay(10);
   radio.write(&msg, sizeof(msg));
+}
+
+void TransferUSOrder (String src, int num) {
+  uint64_t channel = 0xE6E6E6E6E6FF;
+  if (num == 1) {
+    channel = 0xE6E6E6E6E677;
+  } else if (num == 2) {
+    channel = 0xE6E6E6E6E678;
+  } else if (num == 3) {
+    channel = 0xE6E6E6E6E679;
+  }
+  char msg[32] = "";
+  src.toCharArray(msg, 32);
+//  Serial.println(msg);
+  radio.stopListening();
+  radio.openWritingPipe(channel);
+  radio.write(&msg, sizeof(msg));
+}
+
+String CheckStatus(int num) {
+  if (usStatus[num-1] == 1) {
+    return "TRUE";
+  } else return "FALSE";
 }

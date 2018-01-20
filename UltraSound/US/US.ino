@@ -7,15 +7,15 @@
 #include "SPI.h"
 
 //超声波模块ID，需要与超声波控制端ID相对应
-const uint64_t US1 = 0xE6E6E6E6E677;
-const uint64_t USC = 0xE6E6E6E6E666;
+const uint64_t US1 = 0xE6E6E6E6E680;
+const uint64_t USC = 0xE6E6E6E6E602;
 
 float detectSet1 = 0;
 float detectSet2 = 0;
 
 RF24 radio(9,10);
-const int TrigPin = 2;
-const int EchoPin = 3;
+const int TrigPin = 4;
+const int EchoPin = 5;
 boolean state = false;
 int flag = 0;
 float cm;
