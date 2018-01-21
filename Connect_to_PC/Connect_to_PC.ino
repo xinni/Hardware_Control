@@ -325,11 +325,11 @@ void TransferOrder (String src) {
 void TransferUSOrder (String src, int num) {
   uint64_t channel = 0xE6E6E6E6E6FF;
   if (num == 1) {
-    channel = 0xE6E6E6E6E677;
+    channel = US1;
   } else if (num == 2) {
-    channel = 0xE6E6E6E6E678;
+    channel = US2;
   } else if (num == 3) {
-    channel = 0xE6E6E6E6E679;
+    channel = US3;
   }
   char msg[32] = "";
   src.toCharArray(msg, 32);
